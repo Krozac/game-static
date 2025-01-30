@@ -2,7 +2,7 @@ const socket = connectToGame();
 
 function connectToGame() {
     // Extract game ID from the URL path (e.g., https://theoguenezan.fr/game/abcdefg)
-    const gameId = window.location.pathname.split('/')[2]; // "abcdefg"
+    const gameId = URLSearchParams.get('gameid'); // "abcdefg"
 
     // Resolve WebSocket server address based on the game ID
     fetch(`http://2.9.223.82:5500/resolve/${gameId}`)
