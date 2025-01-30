@@ -1,16 +1,15 @@
 const socket = connectToGame();
 
 function connectToGame() {
-    // Extract game ID from the URL (e.g., https://mygame.com/game/abcdefg)
-    const urlParams = new URL(window.location.href);
-    const gameId = urlParams.pathname.split('/').pop(); // "abcdefg"
+    // Extract game ID from the URL path (e.g., https://theoguenezan.fr/game/abcdefg)
+    const gameId = window.location.pathname.split('/')[2]; // "abcdefg"
 
     // Resolve WebSocket server address based on the game ID
-    fetch(`https://mygame.com/api/getServer?gameId=${gameId}`)
+    fetch(`http://2.9.223.82:5500/resolve/${gameId}`)
         .then(response => response.json())
         .then(data => {
-            if (data.serverAddress) {
-                const ws = new WebSocket(`ws://${data.serverAddress}:3000`);
+            if (data.ip) {
+                const ws = new WebSocket(`ws://${data.ip}:3000`);
                 
                 ws.onopen = () => {
                     console.log(`Connected to game: ${gameId}`);
@@ -47,39 +46,3 @@ socket.onmessage = (event) => {
         updateGameState(data.players);
     }
 };
-
-socket.onerror = (error) => {
-    console.error("WebSocket Error: ", error);
-};
-
-socket.onclose = () => {
-    console.log("Disconnected from server");
-    document.getElementById("server-status").textContent = "Disconnected from server";
-};
-
-// Send movement data to the server
-document.addEventListener("keydown", (event) => {
-    let move = { type: "move", direction: null };
-    
-    if (event.key === "ArrowUp") move.direction = "up";
-    if (event.key === "ArrowDown") move.direction = "down";
-    if (event.key === "ArrowLeft") move.direction = "left";
-    if (event.key === "ArrowRight") move.direction = "right";
-
-    if (move.direction) {
-        socket.send(JSON.stringify(move));
-    }
-});
-
-// Update player list UI
-function updatePlayersList(players) {
-    const playerList = document.getElementById("playerList");
-    playerList.innerHTML = "";
-    
-    players.forEach(player => {
-        console.log(player)
-        const li = document.createElement("li");
-        li.textContent = `${player.playerId} (${player.position.x}, ${player.position.y})`;
-        playerList.appendChild(li);
-    });
-}
